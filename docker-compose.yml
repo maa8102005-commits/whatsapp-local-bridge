@@ -1,0 +1,25 @@
+services:
+  waha:
+    image: ${WAHA_IMAGE}
+    restart: unless-stopped
+    # Give the built-in Chrome time to write its login data before it is stopped.
+    stop_grace_period: 30s
+    ports:
+      # 127.0.0.1 = reachable from this computer only, never from the network.
+      - "127.0.0.1:${WAHA_PORT}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      WAHA_API_KEY: ${WAHA_API_KEY}
+      WHATSAPP_DEFAULT_ENGINE: WEBJS
+      WHATSAPP_RESTART_ALL_SESSIONS: "True"
+      WHATSAPP_HOOK_URL: http://host.docker.internal:${HOOK_PORT}/hook/${HOOK_TOKEN}
+      WHATSAPP_HOOK_EVENTS: message,session.status
+      WHATSAPP_DOWNLOAD_MEDIA: "true"
+      WAHA_BASE_URL: http://127.0.0.1:${WAHA_PORT}
+      WAHA_PRINT_QR: "False"
+      WHATSAPP_SWAGGER_ENABLED: "false"
+      WAHA_DASHBOARD_ENABLED: "false"
+    volumes:
+      # The WhatsApp login lives in this folder on your computer, outside the container.
+      - ./data/sessions:/app/.sessions

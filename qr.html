@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link WhatsApp</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; text-align: center; background: #fff; color: #111; margin: 40px 16px; }
+  img { width: 340px; height: 340px; max-width: 100%; }
+  #wait { display: none; }
+  .status { margin-top: 16px; color: #555; }
+</style>
+</head>
+<body>
+<h2>WhatsApp &rarr; Settings &rarr; Linked Devices &rarr; Link a Device</h2>
+<img id="qr" alt="Waiting for the QR code">
+<p class="status" id="msg">Starting&hellip;</p>
+<script>
+  var MESSAGES = {
+    STARTING: "Starting…",
+    SCAN_QR_CODE: "Scan now. This code updates by itself.",
+    FAILED: "Getting fresh codes…",
+    TIMEOUT: "Timed out. Run sh link.sh again.",
+    WORKING: "Linked. You can close this page."
+  };
+  var qr = document.getElementById("qr"), msg = document.getElementById("msg");
+
+  function tick() {
+    // Reload the status file the script keeps writing. A script tag also works for local files.
+    var s = document.createElement("script");
+    s.src = "status.js?t=" + Date.now();
+    s.onload = s.onerror = function () { s.remove(); show(window.BRIDGE_STATUS); };
+    document.head.appendChild(s);
+  }
+
+  function show(state) {
+    msg.textContent = MESSAGES[state] || "Status: " + state;
+    var done = state === "WORKING" || state === "TIMEOUT";
+    qr.style.visibility = done ? "hidden" : "visible";
+    if (done) return;
+    // Load the new image off-screen first so the visible code never flickers.
+    var next = new Image();
+    next.onload = function () { qr.src = next.src; };
+    next.src = "qr.png?t=" + Date.now();
+  }
+
+  setInterval(tick, 1500);
+  tick();
+</script>
+</body>
+</html>

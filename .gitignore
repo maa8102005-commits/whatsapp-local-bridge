@@ -1,0 +1,5 @@
+# Secrets and everything personal stay on your machine.
+.env
+data/
+__pycache__/
+*.log
